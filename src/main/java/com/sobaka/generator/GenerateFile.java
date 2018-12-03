@@ -1,12 +1,10 @@
 package com.sobaka.generator;
 
-import com.google.common.io.Files;
-import com.sobaka.Constants;
-import com.sobaka.sort.GuavaSortedChunk;
-import com.sobaka.sort.SortedChunck;
 import org.apache.commons.lang3.RandomStringUtils;
 
-import java.io.*;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Random;
 
 import static com.sobaka.Constants.FILE_FOR_SORT;
@@ -35,16 +33,11 @@ public class GenerateFile {
     }
     public static void main(String[] args) throws IOException {
         int maxLength = 100;
-        int stringNum = 2000;
+        int stringNum = 10;
         if(args.length == 2) {
             //todo
             System.out.println("TODO");
         }
         generateFile(stringNum, maxLength, FILE_FOR_SORT);
-        SortedChunck sortedChunck = new GuavaSortedChunk("test_sort");
-        File initialFile = new File(FILE_FOR_SORT);
-        InputStream inputStream = Files.asByteSource(initialFile).openStream();
-        sortedChunck.readFullChunk(inputStream);
-        sortedChunck.saveChunk();
     }
 }

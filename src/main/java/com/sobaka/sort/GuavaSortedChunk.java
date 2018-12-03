@@ -16,7 +16,7 @@ public class GuavaSortedChunk implements SortedChunck {
 
     private boolean endOfReading() {
         //TODO analyse heap size
-        return sorted.size() > 1000;
+        return sorted.size() > 3;
     }
 
     @Override
@@ -31,18 +31,18 @@ public class GuavaSortedChunk implements SortedChunck {
     }
 
     @Override
-    public void readFullChunk(InputStream inputStream) throws IOException {
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(inputStream))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                this.add(line);
-                if(endOfReading()) {
-                    break;
-                }
+    public boolean readFullChunk(InputStream inputStream) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
+        boolean end = true;
+        String line;
+        while ((line = br.readLine()) != null) {
+            this.add(line);
+            if (endOfReading()) {
+                end = false;
+                break;
             }
         }
-
-
+        return end;
     }
 
     @Override
@@ -51,5 +51,15 @@ public class GuavaSortedChunk implements SortedChunck {
         PrintWriter printWriter = new PrintWriter(fileWriter);
         sorted.forEach(s -> printWriter.println(s));
         printWriter.close();
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public Integer getSize() {
+        return sorted.size();
     }
 }
