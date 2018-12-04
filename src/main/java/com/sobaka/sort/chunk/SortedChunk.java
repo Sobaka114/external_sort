@@ -1,14 +1,14 @@
-package com.sobaka.sort;
+package com.sobaka.sort.chunk;
 
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 
-public interface SortedChunck {
+public interface SortedChunk {
     void add(String s);
     String[] getSortedList();
 //    void readFullChunk(String fileName) throws FileNotFoundException;
 
-    boolean readFullChunk(InputStream inputStream) throws IOException;
+    boolean readFullChunk(BufferedReader inputStream) throws IOException;
 
     void saveChunk() throws IOException;
 

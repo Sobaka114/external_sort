@@ -1,11 +1,12 @@
 package com.sobaka.sort;
 
+import com.sobaka.sort.chunk.GuavaSortedChunk;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.Arrays;
 
-public class SortedChunckTest {
+public class SortedChunkTest {
     @Test
     public void addTest() {
         GuavaSortedChunk guavaSortedChunk = new GuavaSortedChunk("test");

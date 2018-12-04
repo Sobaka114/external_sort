@@ -1,90 +1,100 @@
 package com.sobaka.sort;
 
-import com.google.common.io.Files;
+
+
+import com.sobaka.sort.chunk.creator.ChunkCreator;
+import com.sobaka.sort.chunk.creator.GuavaUniqueChunkCreator;
+import com.sobaka.sort.chunk.SortedChunk;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 
 import static com.sobaka.Constants.FILE_FOR_SORT;
 
 public class SortFile {
-    public static final ChunkCreator chunkCreator = new GuavaUniqieChunckCreator();
-    public static final Map<String, Integer> chunkNames = new HashMap<>();
+    public static final ChunkCreator chunkCreator = new GuavaUniqueChunkCreator();
+    public static final Set<String> chunkNames = new HashSet<>();
 
     public static void main(String[] args) throws IOException {
         sortFile(FILE_FOR_SORT);
     }
 
     private static void sortFile(String fileName) throws IOException {
-        try (InputStream inputStream = new FileInputStream(fileName)) {
+        try (BufferedReader br = new BufferedReader(
+                new InputStreamReader(new FileInputStream(fileName)))) {
             boolean end = false;
             while (!end) {
-                SortedChunck sortedChunk = chunkCreator.createSortedChunk();
-                System.out.println(sortedChunk.getName());
-                end = sortedChunk.readFullChunk(inputStream);
-                chunkNames.put(sortedChunk.getName(), sortedChunk.getSize());
+                SortedChunk sortedChunk = chunkCreator.createSortedChunk();
+                //System.out.println(sortedChunk.getName());
+                end = sortedChunk.readFullChunk(br);
+                chunkNames.add(sortedChunk.getName());
                 sortedChunk.saveChunk();
             }
-
-            while (chunkNames.size() != 1) {
-                Set<String> strings = chunkNames.keySet();
-                Iterator<Map.Entry<String, Integer>> iterator = chunkNames.entrySet().iterator();
-                Map.Entry<String, Integer> entry1 = iterator.next();
-                Map.Entry<String, Integer> entry2 = iterator.next();
-
-                mergeFiles(entry1.getKey(), entry2.getKey());
-            }
         }
+
+        long merge = 0;
+        while (chunkNames.size() > 1) {
+            Iterator<String> iterator = chunkNames.iterator();
+            String left = iterator.next();
+            String right = iterator.next();
+            mergeFiles(left, right, merge);
+            merge ++;
+        }
+
     }
 
-    private static void mergeFiles(String chunkL, String chunkR) throws IOException {
+    private static void mergeFiles(String chunkL, String chunkR, long merge) throws IOException {
         InputStream inputStreamL = new FileInputStream(chunkL);
         InputStream inputStreamR = new FileInputStream(chunkR);
 
         BufferedReader brL = new BufferedReader(new InputStreamReader(inputStreamL));
         BufferedReader brR = new BufferedReader(new InputStreamReader(inputStreamR));
 
-        int lengthL = chunkNames.get(chunkL);
-        int lengthR = chunkNames.get(chunkR);
-        int resultLength = lengthL + lengthR;
-
-        int i = 1;
-        int j = 1;
-        String nextToWrite;
         String stringL = brL.readLine();
         String stringR = brR.readLine();
 
-        String resultFileName = chunkL + chunkR;
+        String resultFileName = "merge" + merge;
         FileWriter fileWriter = new FileWriter(resultFileName);
         PrintWriter printWriter = new PrintWriter(fileWriter);
-
-        while (i < lengthL && j < lengthR && stringL != null && stringR != null) {
-            if(stringL.compareTo(stringR) <= 0) {
-                printWriter.println(stringL);
-                stringL = brL.readLine();
-                i++;
-            } else {
-                printWriter.println(stringR);
-                stringR = brL.readLine();
-                j++;
+        boolean needLn = false;
+        while (stringL != null && stringR != null) {
+            if(needLn) {
+                printWriter.println();
             }
-
-
+            if (stringL.compareTo(stringR) <= 0) {
+                printWriter.print(stringL);
+                stringL = brL.readLine();
+            } else {
+                printWriter.print(stringR);
+                stringR = brR.readLine();
+            }
+            needLn = true;
         }
         String s;
-        while ((s = brL.readLine()) != null) {
-            printWriter.println(s);
-        }
-
-        while ((s = brR.readLine()) != null) {
-            printWriter.println(s);
+        if(stringL != null) {
+            printWriter.println();
+            printWriter.print(stringL);
+            while ((s = brL.readLine()) != null) {
+                printWriter.println();
+                printWriter.print(s);
+            }
+        } else if (stringR != null) {
+            printWriter.println();
+            printWriter.print(stringR);
+            while ((s = brR.readLine()) != null) {
+                printWriter.println();
+                printWriter.print(s);
+            }
         }
         printWriter.close();
         brL.close();
         brR.close();
-
+        Files.delete(Paths.get(chunkL));
+        Files.delete(Paths.get(chunkR));
         chunkNames.remove(chunkL);
         chunkNames.remove(chunkR);
-        chunkNames.put(resultFileName, resultLength);
+        chunkNames.add(resultFileName);
     }
 }

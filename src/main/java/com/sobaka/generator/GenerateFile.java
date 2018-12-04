@@ -27,13 +27,17 @@ public class GenerateFile {
         PrintWriter printWriter = new PrintWriter(fileWriter);
         for(int i = 0; i < stringNum; i++) {
             String randomString = getRandomString(maxLength);
-            printWriter.println(randomString);
+            if(i == stringNum - 1) {
+                printWriter.print(randomString);
+            } else {
+                printWriter.println(randomString);
+            }
         }
         printWriter.close();
     }
     public static void main(String[] args) throws IOException {
-        int maxLength = 100;
-        int stringNum = 10;
+        int maxLength = 1000;
+        int stringNum = 10000000;
         if(args.length == 2) {
             //todo
             System.out.println("TODO");
